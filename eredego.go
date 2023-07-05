@@ -4,9 +4,8 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 )
 
@@ -76,45 +75,23 @@ func basicAuth(username, password string) string {
 }
 
 // GetAuthorization is the function that makes the request to the API to get the authorization for a transaction
-func (e ERedeGo) GetAuthorization(length int) chan string {
+func (e ERedeGo) GetAuthorization(authorization AuthorizationRequest) (AuthorizationResponse, error) {
 	const endpoint = "/v1/transactions"
 
 	url := sandbox + endpoint
 
-	authorization := AuthorizationRequest{
-		Capture:                true,
-		Kind:                   "credit",
-		Reference:              "1234567890123456",
-		Amount:                 100,
-		CardholderName:         "John Doe",
-		CardNumber:             "5448280000000007",
-		ExpirationMonth:        12,
-		ExpirationYear:         2026,
-		SecurityCode:           "123",
-		SoftDescriptor:         "SoftDescriptor",
-		Subscription:           false,
-		Origin:                 1,
-		DistributorAffiliation: 0,
-		BrandTid:               "1234567890123456",
-		StorageCard:            "0",
-		TransactionCredentials: TransactionCredentials{
-			CredentialId: "01",
-		},
-	}
-
 	authorizationJosn, err := json.Marshal(authorization)
 
 	if err != nil {
-		panic(err)
+		return AuthorizationResponse{}, err
 	}
 
-	// make the post request with Base Auth
 	client := &http.Client{}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(authorizationJosn))
 
 	if err != nil {
-		panic(err)
+		return AuthorizationResponse{}, err
 	}
 
 	req.Header.Add("Authorization", "Basic "+basicAuth("72548122", "737df67d33374596b7f199e8329d8a39"))
@@ -123,38 +100,25 @@ func (e ERedeGo) GetAuthorization(length int) chan string {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		panic(err)
+		return AuthorizationResponse{}, err
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		panic(err)
+		return AuthorizationResponse{}, err
 	}
 
 	var result AuthorizationResponse
 	err = json.Unmarshal([]byte(body), &result)
 
 	if err != nil {
-		panic(err)
+		return AuthorizationResponse{}, err
 	}
 
-	// print the entire response
-	fmt.Println(string(body))
+	if result.ReturnCode != "00" {
+		return AuthorizationResponse{}, errors.New("ReturnCode: " + result.ReturnCode + "; " + result.ReturnMessage)
+	}
 
-	// ---------------------------------------------
-
-	r := make(chan string)
-
-	go func() {
-		var result string
-
-		for i := 0; i < length; i++ {
-			result += string(randomStringSource[rand.Intn(len(randomStringSource))])
-		}
-
-		r <- result
-	}()
-
-	return r
+	return result, nil
 }
