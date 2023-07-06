@@ -14,9 +14,6 @@ const production = "https://sandbox-erede.useredecloud.com.br"
 
 const randomStringSource = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-// ERedeGo is the main struct of the package
-type ERedeGo struct{}
-
 // AuthorizationRequest is the struct that contains the request body
 // more documentation at https://developer.userede.com.br/e-rede#endpoint
 type AuthorizationRequest struct {
@@ -75,7 +72,7 @@ func basicAuth(username, password string) string {
 }
 
 // GetAuthorization is the function that makes the request to the API to get the authorization for a transaction
-func (e ERedeGo) GetAuthorization(authorization AuthorizationRequest) (AuthorizationResponse, error) {
+func GetAuthorization(authorization AuthorizationRequest) (AuthorizationResponse, error) {
 	const endpoint = "/v1/transactions"
 
 	url := sandbox + endpoint
