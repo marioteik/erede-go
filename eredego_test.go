@@ -1,11 +1,11 @@
 package eredego
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestERedeGo_GenerateRandomString(t *testing.T) {
-	var eredelib ERedeGo
-
-	result, err := eredelib.GetAuthorization(AuthorizationRequest{
+	result, err := GetAuthorization(AuthorizationRequest{
 		Capture:                true,
 		Kind:                   "credit",
 		Reference:              "1234567890123458",
@@ -31,6 +31,6 @@ func TestERedeGo_GenerateRandomString(t *testing.T) {
 	}
 
 	if result.ReturnCode != "00" {
-		t.Errorf("Expected result, got nil")
+		t.Errorf("Expected result, got and trasaction error instead: %s", result.ReturnMessage)
 	}
 }
