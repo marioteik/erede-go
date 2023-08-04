@@ -10,9 +10,7 @@ import (
 )
 
 const sandbox = "https://sandbox-erede.useredecloud.com.br"
-const production = "https://sandbox-erede.useredecloud.com.br"
-
-const randomStringSource = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const production = "https://api.userede.com.br/erede"
 
 // AuthorizationRequest is the struct that contains the request body
 // more documentation at https://developer.userede.com.br/e-rede#endpoint
@@ -71,7 +69,7 @@ func basicAuth(username, password string) string {
 	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
-// GetAuthorization is the function that makes the request to the API to get the authorization for a transaction
+// GetAuthorization makes the request to the API to get the authorization for a transaction
 func GetAuthorization(authorization AuthorizationRequest) (AuthorizationResponse, error) {
 	const endpoint = "/v1/transactions"
 
@@ -99,6 +97,8 @@ func GetAuthorization(authorization AuthorizationRequest) (AuthorizationResponse
 	if err != nil {
 		return AuthorizationResponse{}, err
 	}
+
+	resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 
